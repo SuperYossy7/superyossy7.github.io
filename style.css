@@ -1,0 +1,28 @@
+@charset "UTF-8";
+
+h1 {
+  background-color: #FF0000;
+  color: #FFFFFF;
+  font-size: 30px;
+  ;
+}
+
+/*body {
+    background-color: #191970;
+}
+
+
+body {
+    background-color: #00FF00;
+}
+*/
+
+.green {
+    background-color: #00FF00;
+    color: #F0F000;
+}
+
+#pink {
+    background-color: #FF0FF0;
+    color: #00F0FF;
+}
