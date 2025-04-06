@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本時間と背景画像</title>
+    <style>
+        /* ページ全体のスタイル */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            color: white;
+            background-size: cover;
+            background-position: center;
+            background-color: black;
+            background-repeat: no-repeat; /* 背景画像が繰り返し表示されないように */
+        }
+
+        /* 時間表示のスタイル */
+        .time-display {
+            font-family: 'Noto Sans', sans-serif; /* フォントを指定 */
+            letter-spacing: 1rem;
+            font-size: 15rem;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        /* 背景画像設定エリア */
+        .background-settings {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        /* 画像URL入力フィールド */
+        .background-settings input[type="text"] {
+            width: 200px;
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        /* サイズ調整スライダー */
+        .background-settings input[type="range"] {
+            margin-right: 10px;
+        }
+
+        /* X, Y座標の入力フィールド */
+        .background-settings input[type="number"] {
+            width: 50px;
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        
+    </style>
+</head>
+<body>
+
+    <!-- 時間表示 -->
+    <div class="time-display" id="timeDisplay">Loading...</div>
+
+    <!-- 背景画像設定 -->
+    <div class="background-settings">
+        <input type="text" id="imageUrl" placeholder="背景画像URLを入力" />
+        <button onclick="changeBackground()">背景画像を変更</button>
+        <br />
+        <label for="sizeRange">背景画像の大きさ:</label>
+        <input type="range" id="sizeRange" min="0" max="200" value="100" oninput="adjustBackgroundSize()" />
+        <span id="sizeValue">100%</span>
+        <br />
+        <label for="xPosition">X座標:</label>
+        <input type="number" id="xPosition" value="0" oninput="adjustBackgroundPosition()" />
+        <br />
+        <label for="yPosition">Y座標:</label>
+        <input type="number" id="yPosition" value="0" oninput="adjustBackgroundPosition()" />
+    </div>
+
+    <script>
+        // 日本時間を取得して表示する関数
+        function updateTime() {
+            const options = { 
+                timeZone: 'Asia/Tokyo',
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false 
+            };
+            const time = new Date().toLocaleTimeString('ja-JP', options);
+            document.getElementById('timeDisplay').textContent = time;
+        }
+
+        // 背景画像のサイズを調整する関数
+        function adjustBackgroundSize() {
+            const size = document.getElementById('sizeRange').value;
+            document.body.style.backgroundSize = size + '%';
+            document.getElementById('sizeValue').textContent = size + '%';
+        }
+
+        // 背景画像の位置を調整する関数
+        function adjustBackgroundPosition() {
+            const xPos = document.getElementById('xPosition').value + 'px';
+            const yPos = document.getElementById('yPosition').value + 'px';
+            document.body.style.backgroundPosition = xPos + ' ' + yPos;
+        }
+
+        // 背景画像を変更する関数
+        function changeBackground() {
+            const imageUrl = document.getElementById('imageUrl').value;
+            if (imageUrl) {
+                document.body.style.backgroundImage = `url(${imageUrl})`;
+            }
+        }
+
+        // 1秒ごとに日本時間を更新
+        setInterval(updateTime, 1000);
+
+        // 初期設定：背景画像とサイズ
+        document.body.style.backgroundImage = 'url("https://via.placeholder.com/1920x1080")'; // 初期背景画像
+        document.body.style.backgroundSize = '100%'; // 初期背景サイズ
+        document.body.style.backgroundPosition = 'center'; // 初期背景位置
+        document.getElementById('sizeRange').value = 100; // 初期サイズスライダー
+        document.getElementById('sizeValue').textContent = '100%'; // 初期サイズ値
+        document.getElementById('xPosition').value = 0; // 初期X座標
+        document.getElementById('yPosition').value = 0; // 初期Y座標
+    </script>
+
+</body>
+</html>
