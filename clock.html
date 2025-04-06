@@ -11,22 +11,31 @@
             padding: 0;
             height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-family: Arial, sans-serif;
+            font-family: 'Noto Sans', sans-serif;
             color: white;
+            background-color: black;
             background-size: cover;
             background-position: center;
-            background-color: black;
-            background-repeat: no-repeat; /* 背景画像が繰り返し表示されないように */
+            background-repeat: no-repeat;
         }
 
         /* 時間表示のスタイル */
         .time-display {
-            font-family: 'Noto Sans', sans-serif; /* フォントを指定 */
-            letter-spacing: 1rem;
-            font-size: 15rem;
+            font-size: 10rem;
             text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+            margin-bottom: 0px; /* 間隔を縮める */
+            line-height: 1.1;
+            letter-spacing: 1rem;
+        }
+
+        /* ストップウォッチのスタイル */
+        .stopwatch-display {
+            font-size: 5rem;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+            cursor: pointer;
         }
 
         /* 背景画像設定エリア */
@@ -39,26 +48,18 @@
             border-radius: 10px;
         }
 
-        /* 画像URL入力フィールド */
-        .background-settings input[type="text"] {
-            width: 200px;
-            padding: 5px;
-            margin-right: 10px;
+        /* UI削除ボタン */
+        .remove-ui-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
         }
-
-        /* サイズ調整スライダー */
-        .background-settings input[type="range"] {
-            margin-right: 10px;
-        }
-
-        /* X, Y座標の入力フィールド */
-        .background-settings input[type="number"] {
-            width: 50px;
-            padding: 5px;
-            margin-right: 10px;
-        }
-
-        
     </style>
 </head>
 <body>
@@ -66,8 +67,11 @@
     <!-- 時間表示 -->
     <div class="time-display" id="timeDisplay">Loading...</div>
 
+    <!-- ストップウォッチ表示 -->
+    <div class="stopwatch-display" id="stopwatchDisplay">00:00.00</div>
+
     <!-- 背景画像設定 -->
-    <div class="background-settings">
+    <div class="background-settings" id="backgroundSettings">
         <input type="text" id="imageUrl" placeholder="背景画像URLを入力" />
         <button onclick="changeBackground()">背景画像を変更</button>
         <br />
@@ -75,12 +79,21 @@
         <input type="range" id="sizeRange" min="0" max="200" value="100" oninput="adjustBackgroundSize()" />
         <span id="sizeValue">100%</span>
         <br />
-        <label for="xPosition">X座標:</label>
-        <input type="number" id="xPosition" value="0" oninput="adjustBackgroundPosition()" />
+        <label for="xPositionRange">X座標:</label>
+        <input type="range" id="xPositionRange" min="-500" max="500" value="0" oninput="adjustBackgroundPosition()" />
+        <span id="xPositionValue">0px</span>
         <br />
-        <label for="yPosition">Y座標:</label>
-        <input type="number" id="yPosition" value="0" oninput="adjustBackgroundPosition()" />
+        <label for="yPositionRange">Y座標:</label>
+        <input type="range" id="yPositionRange" min="-500" max="500" value="0" oninput="adjustBackgroundPosition()" />
+        <span id="yPositionValue">0px</span>
+        <br />
+        <label for="fontSizeRange">文字サイズ:</label>
+        <input type="range" id="fontSizeRange" min="1" max="30" value="10" oninput="adjustFontSize()" />
+        <span id="fontSizeValue">10rem</span>
     </div>
+
+    <!-- UI削除ボタン -->
+    <button class="remove-ui-button" onclick="removeUI()">UIを削除</button>
 
     <script>
         // 日本時間を取得して表示する関数
@@ -96,6 +109,32 @@
             document.getElementById('timeDisplay').textContent = time;
         }
 
+        // ストップウォッチの初期値
+        let stopwatchMilliseconds = 0;
+        let stopwatchInterval;
+        let isRunning = false;
+
+        // ストップウォッチを更新する関数
+        function updateStopwatch() {
+            stopwatchMilliseconds += 10;
+            const minutes = String(Math.floor(stopwatchMilliseconds / 60000)).padStart(2, '0');
+            const seconds = String(Math.floor((stopwatchMilliseconds % 60000) / 1000)).padStart(2, '0');
+            const milliseconds = String(Math.floor((stopwatchMilliseconds % 1000) / 10)).padStart(2, '0');
+            document.getElementById('stopwatchDisplay').textContent = `${minutes}:${seconds}.${milliseconds}`;
+        }
+
+        // ストップウォッチのスタート/リセット
+        document.getElementById('stopwatchDisplay').addEventListener('click', () => {
+            if (isRunning) {
+                clearInterval(stopwatchInterval);
+                stopwatchMilliseconds = 0;
+                document.getElementById('stopwatchDisplay').textContent = '00:00.00';
+            } else {
+                stopwatchInterval = setInterval(updateStopwatch, 10);
+            }
+            isRunning = !isRunning;
+        });
+
         // 背景画像のサイズを調整する関数
         function adjustBackgroundSize() {
             const size = document.getElementById('sizeRange').value;
@@ -105,9 +144,19 @@
 
         // 背景画像の位置を調整する関数
         function adjustBackgroundPosition() {
-            const xPos = document.getElementById('xPosition').value + 'px';
-            const yPos = document.getElementById('yPosition').value + 'px';
+            const xPos = document.getElementById('xPositionRange').value + 'px';
+            const yPos = document.getElementById('yPositionRange').value + 'px';
             document.body.style.backgroundPosition = xPos + ' ' + yPos;
+            document.getElementById('xPositionValue').textContent = xPos;
+            document.getElementById('yPositionValue').textContent = yPos;
+        }
+
+        // 時刻表示とストップウォッチの文字サイズを調整する関数
+        function adjustFontSize() {
+            const fontSize = document.getElementById('fontSizeRange').value;
+            document.getElementById('timeDisplay').style.fontSize = fontSize + 'rem';
+            document.getElementById('stopwatchDisplay').style.fontSize = (fontSize / 2) + 'rem';
+            document.getElementById('fontSizeValue').textContent = fontSize + 'rem';
         }
 
         // 背景画像を変更する関数
@@ -115,6 +164,18 @@
             const imageUrl = document.getElementById('imageUrl').value;
             if (imageUrl) {
                 document.body.style.backgroundImage = `url(${imageUrl})`;
+            }
+        }
+
+        // UIを削除する関数
+        function removeUI() {
+            const settings = document.getElementById('backgroundSettings');
+            if (settings) {
+                settings.remove();
+            }
+            const button = document.querySelector('.remove-ui-button');
+            if (button) {
+                button.remove();
             }
         }
 
@@ -127,8 +188,12 @@
         document.body.style.backgroundPosition = 'center'; // 初期背景位置
         document.getElementById('sizeRange').value = 100; // 初期サイズスライダー
         document.getElementById('sizeValue').textContent = '100%'; // 初期サイズ値
-        document.getElementById('xPosition').value = 0; // 初期X座標
-        document.getElementById('yPosition').value = 0; // 初期Y座標
+        document.getElementById('xPositionRange').value = 0; // 初期X座標スライダー
+        document.getElementById('xPositionValue').textContent = '0px'; // 初期X座標値
+        document.getElementById('yPositionRange').value = 0; // 初期Y座標スライダー
+        document.getElementById('yPositionValue').textContent = '0px'; // 初期Y座標値
+        document.getElementById('fontSizeRange').value = 10; // 初期文字サイズスライダー
+        document.getElementById('fontSizeValue').textContent = '10rem'; // 初期文字サイズ値
     </script>
 
 </body>
